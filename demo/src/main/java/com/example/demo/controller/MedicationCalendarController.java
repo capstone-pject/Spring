@@ -4,6 +4,8 @@ package com.example.demo.controller;
 import com.example.demo.Dto.MedicationCalendarDto;
 import com.example.demo.Sercive.MedicationCalendarService;
 import jakarta.persistence.EntityNotFoundException;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat; // 날짜 파싱을 위해 추가
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +18,10 @@ import java.util.List;
 @RequestMapping("/api/medication-schedules")
 public class MedicationCalendarController {
 
-    private final MedicationCalendarService medicationCalendarService;
+    @Autowired
+  MedicationCalendarService medicationCalendarService;
 
-    public MedicationCalendarController(MedicationCalendarService medicationCalendarService) {
-        this.medicationCalendarService = medicationCalendarService;
-    }
+
 
     // 시나리오 1: 달력에 기간별 약물 일정 표시를 위한 API
     // GET /api/medication-schedules/user/{userId}/range?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD

@@ -1,187 +1,337 @@
 /* src/Calendar.css */
+body { /* 전체 페이지에 기본 폰트 적용 (선택 사항) */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
 .calendar-container {
-    width: 90%;
-    max-width: 700px;
-    margin: 20px auto;
-    border: 1px solid #ccc;
-    font-family: Arial, sans-serif;
-  }
-  
-  .calendar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    background-color: #f0f0f0;
-    border-bottom: 1px solid #ccc;
-  }
-  
-  .calendar-header button {
-    background: none;
-    border: none;
-    font-size: 1.2em;
-    cursor: pointer;
-  }
-  
-  .days-header {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    text-align: center;
-    background-color: #eee;
-  }
-  
-  .day-label {
-    padding: 8px 0;
-    font-weight: bold;
-    border-right: 1px solid #ddd;
-  }
-  .day-label:last-child {
-    border-right: none;
-  }
-  
-  .calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    grid-auto-rows: minmax(80px, auto); /* 셀 높이 조절 */
-  }
-  
-  .cell {
-    border-right: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
-    padding: 5px;
-    text-align: right;
-    cursor: pointer;
-    position: relative; /* For schedule items */
-  }
-  .cell:nth-child(7n) { /* 토요일 오른쪽 테두리 제거 */
-    border-right: none;
-  }
-  .cell:nth-last-child(-n+7) { /* 마지막 줄 아래 테두리 제거 */
-     /* border-bottom: none; */ /* 주석처리하여 마지막 줄도 테두리 유지 */
-  }
-  
-  
-  .cell.disabled {
-    color: #aaa;
-    background-color: #f9f9f9;
-    cursor: default;
-  }
-  
-  .cell:hover:not(.disabled) {
-    background-color: #e8f4ff;
-  }
-  
-  .cell.selected {
-    background-color: #d0e8ff;
-    font-weight: bold;
-  }
-  
-  .cell .number {
-    font-size: 0.9em;
-    display: block;
-    margin-bottom: 5px;
-  }
-  
-  .schedule-item {
-    background-color: #a2d2ff;
-    color: white;
-    font-size: 0.7em;
-    padding: 2px 4px;
-    border-radius: 3px;
-    margin-top: 2px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    text-align: left;
-  }
-  
-  /* Modal styles */
-  .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
-  .modal-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 5px;
-    width: 90%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-  }
-  
-  .close-button {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 1.5em;
-    cursor: pointer;
-  }
-  
-  .modal-content form div {
-    margin-bottom: 15px;
-  }
-  .modal-content label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-  }
-  .modal-content input[type="text"],
-  .modal-content input[type="date"],
-  .modal-content input[type="time"],
-  .modal-content textarea {
-    width: calc(100% - 22px); /* padding 고려 */
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-  }
-  .modal-content textarea {
-    min-height: 60px;
-    resize: vertical;
-  }
-  .modal-content button[type="submit"],
-  .modal-content button[type="button"] {
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-right: 5px;
-  }
-  .modal-content button[type="submit"]:hover,
-  .modal-content button[type="button"]:hover {
-    background-color: #0056b3;
-  }
-  
-  .drug-search-results {
-    list-style-type: none;
-    padding: 0;
-    margin: 5px 0 0 0;
-    border: 1px solid #eee;
-    max-height: 150px;
-    overflow-y: auto;
-  }
-  .drug-search-results li {
-    padding: 8px;
-    cursor: pointer;
-    border-bottom: 1px solid #f0f0f0;
-  }
-  .drug-search-results li:last-child {
-    border-bottom: none;
-  }
-  .drug-search-results li:hover {
-    background-color: #f0f8ff;
-  }
-  
+  width: 90%;
+  max-width: 800px; /* 최대 너비 약간 증가 */
+  margin: 30px auto; /* 상하 마진 증가 */
+  border: 1px solid #e0e0e0; /* 테두리 색상 약간 부드럽게 */
+  font-family: Arial, sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* 부드러운 그림자 효과 */
+  border-radius: 8px; /* 컨테이너 모서리 둥글게 */
+  overflow: hidden; /* 내부 요소가 둥근 모서리를 넘어가지 않도록 */
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px; /* 패딩 증가 */
+  background-color: #f7f9fc; /* 헤더 배경색 변경 */
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.calendar-header span { /* 년월 표시 텍스트 */
+  font-size: 1.2em;
+  font-weight: 500;
+  color: #333;
+}
+
+.calendar-header button {
+  background: none;
+  border: none;
+  font-size: 1.5em; /* 아이콘 크기 증가 */
+  cursor: pointer;
+  color: #555;
+  padding: 5px; /* 클릭 영역 확보 */
+  transition: color 0.2s ease-in-out;
+}
+.calendar-header button:hover {
+  color: #007bff;
+}
+
+.calendar-days { /* 요일 헤더 (days-header 클래스명 변경했음) */
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  background-color: #f0f2f5; /* 요일 배경색 약간 변경 */
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.day-label {
+  padding: 10px 0; /* 패딩 조정 */
+  font-weight: 500; /* 폰트 두께 조정 */
+  font-size: 0.9em;
+  color: #555;
+  /* border-right: 1px solid #ddd; */ /* 오른쪽 테두리 제거, grid gap으로 대체 가능 */
+}
+/* .day-label:last-child {
+  border-right: none;
+} */
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: minmax(100px, auto); /* 셀 최소 높이 증가 */
+  gap: 1px; /* 셀 사이 간격으로 테두리 효과 */
+  background-color: #e0e0e0; /* gap 색상 = 테두리 색상 */
+  border-top: 1px solid #e0e0e0; /* 그리드 상단 테두리 */
+}
+
+.cell {
+  /* border-right: 1px solid #ddd; */ /* gap으로 대체 */
+  /* border-bottom: 1px solid #ddd; */ /* gap으로 대체 */
+  background-color: #fff; /* 셀 기본 배경색 */
+  padding: 8px; /* 패딩 증가 */
+  text-align: left; /* 숫자 왼쪽 정렬 */
+  cursor: pointer;
+  position: relative; 
+  transition: background-color 0.2s ease-in-out;
+  display: flex; /* 내부 요소 정렬을 위해 flex 사용 */
+  flex-direction: column; /* 요소들을 세로로 쌓음 */
+  justify-content: space-between; /* 숫자와 일정 표시 간 간격 */
+}
+
+/* .cell:nth-child(7n) { 
+  border-right: none;
+} */
+
+.cell.disabled {
+  color: #b0b0b0; /* 비활성 날짜 색상 */
+  background-color: #f9f9f9;
+  cursor: default;
+}
+
+.cell:hover:not(.disabled) {
+  background-color: #eef5ff; /* 호버 색상 변경 */
+}
+
+.cell.selected {
+  background-color: #d1e7fd; /* 선택된 날짜 배경색 변경 */
+  font-weight: bold;
+  box-shadow: inset 0 0 0 2px #007bff; /* 선택된 날짜 테두리 효과 */
+}
+
+.cell .number {
+  font-size: 0.9em;
+  display: inline-block; /* 왼쪽 정렬을 위해 */
+  margin-bottom: 5px;
+  padding: 2px 4px;
+  border-radius: 50%; /* 숫자를 동그랗게 감싸기 (선택적) */
+}
+
+.cell.selected .number {
+  color: #007bff;
+}
+
+
+.cell.has-schedule .number {
+  font-weight: bold;
+  /* color: #007bff; 일정이 있는 날짜 숫자 색상 -> selected와 겹칠 수 있어 점으로 구분 */
+}
+
+.schedule-item-sm-container { /* 일정 점들 컨테이너 */
+  display: flex;
+  flex-wrap: wrap; /* 점이 많으면 다음 줄로 */
+  min-height: 10px; /* 점이 없을 때도 공간 유지 */
+  padding-top: 4px;
+}
+
+.schedule-item-sm {
+  width: 6px; /* 점 크기 */
+  height: 6px;
+  background-color: #007bff; /* 점 색상 */
+  border-radius: 50%;
+  margin-right: 3px; /* 점 사이 간격 */
+  margin-bottom: 3px;
+  display: inline-block;
+  /* font-size: 0.7em; */ /* 기존 텍스트 기반 점 대신 사용 */
+  /* color: #007bff; */
+  /* margin-left: 5px; */
+  /* line-height: 1; */
+}
+/* 더 많은 일정 종류를 구분하고 싶다면, 다른 색상 추가 가능 */
+.schedule-item-sm.type2 { background-color: #28a745; }
+.schedule-item-sm.type3 { background-color: #ffc107; }
+
+
+/* Modal styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* 배경 어둡게 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px; /* 모바일 화면에서 모달이 꽉 차지 않도록 */
+  box-sizing: border-box;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 25px 30px; /* 패딩 증가 */
+  border-radius: 8px; /* 모달 모서리 둥글게 */
+  width: 100%; /* 패딩 고려하여 너비 조정 */
+  max-width: 550px; /* 최대 너비 증가 */
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.close-button {
+  position: absolute;
+  top: 15px; /* 위치 조정 */
+  right: 20px;
+  font-size: 1.8em; /* 크기 증가 */
+  font-weight: bold;
+  color: #aaa;
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
+}
+.close-button:hover {
+  color: #777;
+}
+
+.modal-content h3 { /* 날짜 표시 제목 */
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.4em;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+.modal-content h4 { /* 새 약물 일정 등록 제목 */
+  margin-top: 25px;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+  color: #333;
+}
+
+
+.modal-content form div {
+  margin-bottom: 18px; /* 폼 내부 항목 간 간격 증가 */
+}
+.modal-content label {
+  display: block;
+  margin-bottom: 6px; /* 레이블과 입력 필드 사이 간격 */
+  font-weight: 500; /* 폰트 두께 조정 */
+  font-size: 0.95em;
+  color: #454545;
+}
+.modal-content input[type="text"],
+.modal-content input[type="date"],
+.modal-content input[type="time"],
+.modal-content textarea {
+  width: 100%; /* box-sizing으로 인해 패딩 포함 */
+  padding: 12px; /* 패딩 증가 */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 1em;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+.modal-content input[type="text"]:focus,
+.modal-content input[type="date"]:focus,
+.modal-content input[type="time"]:focus,
+.modal-content textarea:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  outline: none;
+}
+
+.modal-content textarea {
+  min-height: 80px; /* 최소 높이 증가 */
+  resize: vertical;
+}
+.modal-content button[type="submit"],
+.modal-content button[type="button"] {
+  padding: 12px 18px; /* 버튼 패딩 증가 */
+  font-size: 1em;
+  /* background-color: #007bff; */ /* 기본 버튼 색상 아래에 정의 */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 8px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.modal-content button[type="submit"] {
+  background-color: #007bff;
+}
+.modal-content button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+.modal-content button[type="button"] { /* '검색', '시간 추가', '삭제' 등 */
+  background-color: #6c757d;
+}
+.modal-content button[type="button"]:hover {
+  background-color: #545b62;
+}
+/* 약물 검색 결과 리스트 */
+.drug-search-results {
+  list-style-type: none;
+  padding: 0;
+  margin: 8px 0 0 0; /* 위치 조정 */
+  border: 1px solid #ddd;
+  border-radius: 4px; /* 모서리 둥글게 */
+  max-height: 160px; /* 높이 약간 증가 */
+  overflow-y: auto;
+  background-color: #fff;
+}
+.drug-search-results li {
+  padding: 10px 12px; /* 패딩 조정 */
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.9em;
+  transition: background-color 0.2s ease-in-out;
+}
+.drug-search-results li:last-child {
+  border-bottom: none;
+}
+.drug-search-results li:hover {
+  background-color: #f0f7ff; /* 호버 색상 변경 */
+}
+
+/* 표시되는 당일 약물 일정 목록 */
+.daily-schedules-list {
+  margin-bottom: 25px; /* 아래 여백 증가 */
+  max-height: 220px; /* 높이 약간 증가 */
+  overflow-y: auto;
+  /* border: 1px solid #eee; */ /* 테두리 제거 또는 약하게 */
+  padding: 0; /* 내부 패딩 제거, .daily-schedule-item 에서 관리 */
+}
+
+.daily-schedule-item {
+  padding: 12px; /* 패딩 증가 */
+  border: 1px solid #e9ecef; /* 테두리 추가 */
+  border-radius: 4px; /* 모서리 둥글게 */
+  margin-bottom: 10px; /* 아이템 간 간격 */
+  background-color: #f8f9fa; /* 배경색 약간 추가 */
+}
+.daily-schedule-item:last-child {
+  margin-bottom: 0;
+}
+
+.daily-schedule-item p {
+  margin: 6px 0; /* 문단 간격 조정 */
+  font-size: 0.95em; /* 폰트 크기 조정 */
+  color: #495057; /* 텍스트 색상 */
+}
+
+.daily-schedule-item strong {
+  color: #212529; /* 강조 텍스트 색상 */
+  margin-right: 5px;
+}
+
+.modal-content hr {
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 25px 0; /* 위아래 여백 증가 */
+}
+
+/* 섭취 시간 추가/삭제 버튼 주변 정렬 */
+.modal-content form div > div[style*="display: flex"] { /* 섭취 시간 한 줄 */
+  margin-bottom: 8px !important; /* 개별 시간 입력 필드 아래 마진 조정 */
+}
+.modal-content form div > button[type="button"] { /* '시간 추가' 버튼 */
+  margin-top: 5px;
+}
