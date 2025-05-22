@@ -192,7 +192,7 @@ function Calendar({ userId }) {
     };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/medication-schedules`, {
+      const response = await fetch(`${API_BASE_URL}/api/medication-schedules`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(scheduleData),

@@ -17,7 +17,7 @@ export default function Login() {
 
     try {
       // 백엔드 로그인 API 엔드포인트 URL
-      const response = await fetch('/login', { // 프록시 설정이 적용됩니다.
+      const response = await fetch('/users/login', { // 프록시 설정이 적용됩니다.
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

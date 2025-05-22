@@ -55,10 +55,7 @@ public ResponseEntity<?> login(@RequestBody UserInfoDto userInfoDto) {
     boolean loginSuccess = UserInfoService.login(userInfoDto);
 
     if (loginSuccess) {
-        // 로그인 성공 시: 200 OK 와 함께 성공 메시지 반환 (필요시 사용자 정보 포함)
-        // 중요: 반환되는 정보에 민감한 데이터(예: 비밀번호)가 포함되지 않도록 주의하세요.
-        // 예시: return ResponseEntity.ok("로그인 성공");
-        // 또는 사용자 ID만 포함하여 반환"
+      
         System.out.println("로그인 성공");
          return ResponseEntity.ok().body("로그인 성공: " + userInfoDto.getUserId());
     } else {

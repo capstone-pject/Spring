@@ -16,7 +16,7 @@ export default function Join() {
 
     try {
       // 백엔드 API 엔드포인트 URL (실제 환경에 맞게 수정 필요)
-      const response = await fetch('/join', { // proxy 설정을 사용하거나 전체 URL을 입력하세요. 예: 'http://localhost:8080/join'
+      const response = await fetch('/users/join', { // proxy 설정을 사용하거나 전체 URL을 입력하세요. 예: 'http://localhost:8080/join'
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
