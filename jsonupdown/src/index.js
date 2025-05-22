@@ -5,7 +5,7 @@ import Login from './Login';
 import Join from './Join'
 import reportWebVitals from './reportWebVitals';
 import Calendar from './Calendar';
-
+import DrugSearch from './DrugSearch';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
@@ -13,6 +13,7 @@ root.render(
       <Join /> 
       <Login /> 
       <Calendar userId="a" />
+      <DrugSearch />
   </React.StrictMode>
 );
 
