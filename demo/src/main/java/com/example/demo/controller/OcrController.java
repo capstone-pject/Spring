@@ -1,3 +1,4 @@
+// ... existing code ...
 package com.example.demo.controller;
 
 import com.example.demo.Dto.DrugInfoDto;
@@ -5,9 +6,18 @@ import com.example.demo.Sercive.DrugInfoService;
 import com.example.demo.Sercive.OcrService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType; // 추가
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import io.swagger.v3.oas.annotations.Operation; // 추가
+import io.swagger.v3.oas.annotations.Parameter; // 추가
+import io.swagger.v3.oas.annotations.media.Content; // 추가
+import io.swagger.v3.oas.annotations.media.Schema; // 추가
+import io.swagger.v3.oas.annotations.responses.ApiResponse; // 추가
+import io.swagger.v3.oas.annotations.responses.ApiResponses; // 추가
+import io.swagger.v3.oas.annotations.tags.Tag; // 추가
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -16,12 +26,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
-import java.util.stream.Collectors;
 import java.util.ArrayList;
 
+@Tag(name = "OCR 및 약물 검색 API", description = "이미지에서 텍스트를 추출(OCR)하고, 추출된 텍스트를 기반으로 약물 정보를 검색하는 API입니다.")
 @RestController
 @RequestMapping("/api/ocr")
-// 중요: 프론트엔드 주소에 맞게 origins를 설정하고, allowCredentials가 true이면 "*" 사용 불가
 public class OcrController {
 
     @Autowired
@@ -30,23 +39,26 @@ public class OcrController {
     @Autowired
     private DrugInfoService drugInfoService;
 
-    /**
-     * 사용자가 지정한 이미지 영역(ROI)에서 텍스트를 추출하고,
-     * 추출된 텍스트의 단어별로 약물 정보를 검색합니다.
-     * @param imageFile 업로드된 이미지 파일
-     * @param x ROI 시작 x 좌표
-     * @param y ROI 시작 y 좌표
-     * @param width ROI 너비
-     * @param height ROI 높이
-     * @return ROI 내 OCR 텍스트, 검색된 약물 정보 리스트 등을 포함한 응답
-     */
-    @PostMapping("/upload-with-roi-and-search")
+    @Operation(summary = "이미지 영역(ROI) OCR 및 단어별 약물 검색",
+               description = "업로드된 이미지의 지정된 영역(ROI)에서 텍스트를 추출하고, 추출된 각 단어로 약물 정보를 검색하여 반환합니다. " +
+                             "요청은 'multipart/form-data' 형식이어야 합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "OCR 및 검색 성공 또는 부분 성공 (메시지 확인 필요)",
+                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                        schema = @Schema(type = "object", example = "{\"ocrTextInRoi\":\"추출된텍스트\", \"searchedTerms\":[\"단어1\",\"단어2\"], \"drugInfos\":[{\"drugCode\":\"123\", \"itemName\":\"약이름\"}]}"))),
+        @ApiResponse(responseCode = "400", description = "잘못된 요청 (예: 이미지 파일 누락, ROI 크기 오류)",
+                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(type = "object", example = "{\"error\":\"에러 메시지\"}"))),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류 (이미지 처리, OCR, 또는 검색 중 오류 발생)",
+                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(type = "object", example = "{\"error\":\"에러 메시지\"}")))
+    })
+    @PostMapping(value = "/upload-with-roi-and-search", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadImageWithRoiAndSearch(
+            @Parameter(description = "업로드할 이미지 파일", required = true, content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
             @RequestParam("imageFile") MultipartFile imageFile,
-            @RequestParam("x") int x,
-            @RequestParam("y") int y,
-            @RequestParam("width") int width,
-            @RequestParam("height") int height) {
+            @Parameter(description = "ROI 시작 x 좌표", required = true, example = "10") @RequestParam("x") int x,
+            @Parameter(description = "ROI 시작 y 좌표", required = true, example = "20") @RequestParam("y") int y,
+            @Parameter(description = "ROI 너비", required = true, example = "100") @RequestParam("width") int width,
+            @Parameter(description = "ROI 높이", required = true, example = "50") @RequestParam("height") int height) {
 
         if (imageFile == null || imageFile.isEmpty()) {
             return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Image file is required."));
@@ -56,35 +68,21 @@ public class OcrController {
         }
 
         try {
-            // 1. OcrService를 사용하여 지정된 ROI에서 텍스트 추출
             String textInRoi = ocrService.extractTextFromImageRoi(imageFile, x, y, width, height);
-            // System.out.println("ROI OCR 추출 텍스트: " + textInRoi);
-
             if (textInRoi.isEmpty()) {
                 return ResponseEntity.ok(Map.of(
                     "message", "선택한 영역에서 텍스트를 추출하지 못했습니다.",
-                    "ocrTextInRoi", textInRoi // 빈 텍스트라도 전달
+                    "ocrTextInRoi", textInRoi
                 ));
             }
-
-            // 2. 추출된 ROI 텍스트를 단어 단위로 분리 및 약물 검색
             String[] words = textInRoi.trim().split("\\s+");
-            // System.out.println("ROI에서 분리된 단어들: " + Arrays.toString(words));
-            
             Set<DrugInfoDto> aggregatedResults = new HashSet<>();
             List<String> searchTermsUsed = new ArrayList<>();
-
             for (String word : words) {
                 String searchTerm = word.trim();
-                // TODO: 여기에 필요한 단어 필터링 로직을 이전과 같이 적용 (길이, 숫자, 불용어 등)
                 if (searchTerm.length() < 2 || searchTerm.matches("^\\d+$")) {
                     continue;
                 }
-                // List<String> stopwords = Arrays.asList(...);
-                // if (isStopWord(searchTerm, stopwords)) continue;
-
-
-                // System.out.println("ROI 단어로 약물 검색 시도: '" + searchTerm + "'");
                 searchTermsUsed.add(searchTerm);
                 try {
                     List<DrugInfoDto> drugInfos = drugInfoService.getDrugInfoByName(searchTerm);
@@ -95,9 +93,7 @@ public class OcrController {
                     System.err.println("ROI 단어 '" + searchTerm + "'로 약물 정보 검색 중 오류 발생: " + e.getMessage());
                 }
             }
-
             List<DrugInfoDto> finalResults = new ArrayList<>(aggregatedResults);
-
             if (finalResults.isEmpty()) {
                  return ResponseEntity.ok(Map.of(
                     "message", "선택 영역의 텍스트로 검색된 약물 정보가 없습니다.",
@@ -105,13 +101,11 @@ public class OcrController {
                     "searchedTerms", searchTermsUsed
                 ));
             }
-
             return ResponseEntity.ok(Map.of(
                 "ocrTextInRoi", textInRoi,
                 "searchedTerms", searchTermsUsed,
                 "drugInfos", finalResults
             ));
-
         } catch (IllegalArgumentException e) {
              return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
         } 
@@ -126,15 +120,25 @@ public class OcrController {
         }
     }
 
-
-    // 기존의 전체 이미지 OCR 후 단어별 검색 엔드포인트 (유지)
-    @PostMapping("/upload-and-search-by-words")
-    public ResponseEntity<?> uploadAndSearchByWords(@RequestParam("imageFile") MultipartFile imageFile) {
-        // ... (이전 코드와 동일) ...
+    @Operation(summary = "전체 이미지 OCR 및 단어별 약물 검색",
+               description = "업로드된 전체 이미지에서 텍스트를 추출하고, 추출된 각 단어로 약물 정보를 검색하여 반환합니다. " +
+                             "요청은 'multipart/form-data' 형식이어야 합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "OCR 및 검색 성공 또는 부분 성공 (메시지 확인 필요)",
+                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                        schema = @Schema(type = "object", example = "{\"ocrText\":\"추출된전체텍스트\", \"searchedTerms\":[\"단어1\",\"단어2\"], \"drugInfos\":[{\"drugCode\":\"123\", \"itemName\":\"약이름\"}]}"))),
+        @ApiResponse(responseCode = "400", description = "잘못된 요청 (예: 이미지 파일 누락)",
+                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(type = "object", example = "{\"error\":\"에러 메시지\"}"))),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(type = "object", example = "{\"error\":\"에러 메시지\"}")))
+    })
+    @PostMapping(value = "/upload-and-search-by-words", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadAndSearchByWords(
+            @Parameter(description = "업로드할 이미지 파일", required = true, content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
+            @RequestParam("imageFile") MultipartFile imageFile) {
         if (imageFile == null || imageFile.isEmpty()) {
             return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Image file is required."));
         }
-
         try {
             String fullExtractedText = ocrService.extractTextFromImage(imageFile);
             if (fullExtractedText.isEmpty() || fullExtractedText.startsWith("No text")) {
@@ -148,11 +152,9 @@ public class OcrController {
                 if (searchTerm.length() < 2 || searchTerm.matches("\\d+")) {
                     continue;
                 }
-                // 이전 불용어 처리 로직 등 유지
-                List<String> stopwords = Arrays.asList("SINCE", "일반의약품", "연질캡슐", "캡슐", "정", "제약", "주식회사","연질"); // "일반의약품" 중복 제거
+                List<String> stopwords = Arrays.asList("SINCE", "일반의약품", "연질캡슐", "캡슐", "정", "제약", "주식회사","연질");
                 boolean isStopword = stopwords.stream().anyMatch(sw -> searchTerm.toLowerCase().contains(sw.toLowerCase()));
                  if (isStopword && searchTerm.length() < 4) { 
-                    // continue; 
                 }
                 searchTermsUsed.add(searchTerm);
                 try {
@@ -177,17 +179,29 @@ public class OcrController {
                 "searchedTerms", searchTermsUsed,
                 "drugInfos", finalResults
             ));
-        } catch (Exception e) { // 더 포괄적인 예외 처리
+        } catch (Exception e) { 
              e.printStackTrace();
              return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                   .body(Collections.singletonMap("error", "An unexpected error occurred: " + e.getMessage()));
         }
     }
 
-    // 기존의 OCR 텍스트만 반환하는 엔드포인트 (유지)
-    @PostMapping("/upload")
-    public ResponseEntity<Map<String, String>> uploadImageAndExtractOnlyText(@RequestParam("imageFile") MultipartFile imageFile) {
-       // ... (이전 코드와 동일) ...
+    @Operation(summary = "전체 이미지 OCR (텍스트만 반환)",
+               description = "업로드된 전체 이미지에서 텍스트만 추출하여 반환합니다. " +
+                             "요청은 'multipart/form-data' 형식이어야 합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "OCR 성공",
+                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                        schema = @Schema(type = "object", example = "{\"extractedText\":\"추출된 전체 텍스트\"}"))),
+        @ApiResponse(responseCode = "400", description = "잘못된 요청 (예: 이미지 파일 누락)",
+                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(type = "object", example = "{\"error\":\"에러 메시지\"}"))),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류 (텍스트 추출 실패)",
+                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(type = "object", example = "{\"error\":\"에러 메시지\"}")))
+    })
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, String>> uploadImageAndExtractOnlyText(
+            @Parameter(description = "업로드할 이미지 파일", required = true, content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
+            @RequestParam("imageFile") MultipartFile imageFile) {
         if (imageFile == null || imageFile.isEmpty()) {
             return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Image file is required."));
         }
@@ -199,3 +213,4 @@ public class OcrController {
         }
     }
 }
+// ... existing code ...

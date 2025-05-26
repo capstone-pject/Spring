@@ -1,3 +1,4 @@
+// ... existing code ...
 // demo/src/main/java/com/example/demo/controller/MedicationCalendarController.java
 package com.example.demo.controller;
 
@@ -8,12 +9,24 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat; // 날짜 파싱을 위해 추가
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType; // 추가
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import io.swagger.v3.oas.annotations.Operation; // 추가
+import io.swagger.v3.oas.annotations.Parameter; // 추가
+import io.swagger.v3.oas.annotations.enums.ParameterIn; // 추가
+import io.swagger.v3.oas.annotations.media.ArraySchema; // 추가
+import io.swagger.v3.oas.annotations.media.Content; // 추가
+import io.swagger.v3.oas.annotations.media.Schema; // 추가
+import io.swagger.v3.oas.annotations.responses.ApiResponse; // 추가
+import io.swagger.v3.oas.annotations.responses.ApiResponses; // 추가
+import io.swagger.v3.oas.annotations.tags.Tag; // 추가
 
 import java.time.LocalDate; // LocalDate 임포트
 import java.util.List;
 
+@Tag(name = "복용일정 관리 API", description = "사용자의 복용 일정 등록, 조회, 수정, 삭제 관련 API 명세입니다.")
 @RestController
 @RequestMapping("/api/medication-schedules")
 public class MedicationCalendarController {
@@ -22,22 +35,24 @@ public class MedicationCalendarController {
   MedicationCalendarService medicationCalendarService;
 
 
-
-    // 시나리오 1: 달력에 기간별 약물 일정 표시를 위한 API
-    // GET /api/medication-schedules/user/{userId}/range?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+    @Operation(summary = "사용자 기간별 복용 일정 조회", description = "특정 사용자의 지정된 기간 내 복용 일정을 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = MedicationCalendarDto.class)))),
+        @ApiResponse(responseCode = "400", description = "잘못된 요청 (예: 날짜 형식 오류)", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE)),
+        @ApiResponse(responseCode = "404", description = "사용자 또는 일정 없음", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE)),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
+    })
     @GetMapping("/user/{userId}/range")
     public ResponseEntity<?> getSchedulesByUserIdAndDateRange(
-            @PathVariable String userId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+            @Parameter(description = "사용자 ID", required = true, example = "user123") @PathVariable String userId,
+            @Parameter(description = "조회 시작일 (YYYY-MM-DD)", required = true, example = "2024-01-01") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @Parameter(description = "조회 종료일 (YYYY-MM-DD)", required = true, example = "2024-01-31") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         try {
             List<MedicationCalendarDto> schedules = medicationCalendarService.getMedicationSchedulesByUserIdAndDateRange(userId, startDate, endDate);
             return ResponseEntity.ok(schedules);
         } catch (EntityNotFoundException e) {
-            // 예: 사용자를 찾을 수 없음
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
-            // 예: 날짜 파라미터 오류
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             System.err.println("Error fetching schedules by date range for user " + userId + ": " + e.getMessage());
@@ -46,16 +61,23 @@ public class MedicationCalendarController {
         }
     }
 
+    @Operation(summary = "복용 일정 추가", description = "새로운 복용 일정을 등록합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "등록 성공", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = MedicationCalendarDto.class))),
+        @ApiResponse(responseCode = "400", description = "잘못된 요청 (예: 필수 필드 누락)", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE)),
+        @ApiResponse(responseCode = "404", description = "관련 사용자 정보를 찾을 수 없음", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE)),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
+    })
 
-    // 시나리오 2: 약물 검색, 정보 기입 후 제출 (기존 API 사용)
-    // POST /api/medication-schedules
     @PostMapping
-    public ResponseEntity<?> addMedicationSchedule(@RequestBody MedicationCalendarDto scheduleDto) {
+    public ResponseEntity<?> addMedicationSchedule(
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "등록할 복용 일정 정보", required = true, content = @Content(schema = @Schema(implementation = MedicationCalendarDto.class)))
+        @RequestBody MedicationCalendarDto scheduleDto) {
         try {
             MedicationCalendarDto createdSchedule = medicationCalendarService.addMedicationSchedule(scheduleDto);
             return new ResponseEntity<>(createdSchedule, HttpStatus.CREATED);
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); // 사용자를 찾지 못한 경우
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); 
         } catch (Exception e) {
             System.err.println("Unexpected error adding medication schedule: " + e.getMessage());
             e.printStackTrace();
@@ -63,9 +85,15 @@ public class MedicationCalendarController {
         }
     }
 
-    // 특정 ID의 약물 복용 일정 조회 (GET /api/medication-schedules/{id})
+    @Operation(summary = "특정 ID 복용 일정 조회", description = "ID에 해당하는 복용 일정을 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = MedicationCalendarDto.class))),
+        @ApiResponse(responseCode = "404", description = "일정 없음", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE)),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<?> getMedicationScheduleById(@PathVariable Long id) {
+    public ResponseEntity<?> getMedicationScheduleById(
+            @Parameter(description = "복용 일정 ID", required = true, example = "1") @PathVariable Long id) {
         try {
             MedicationCalendarDto scheduleDto = medicationCalendarService.getMedicationScheduleById(id);
             return ResponseEntity.ok(scheduleDto);
@@ -78,13 +106,17 @@ public class MedicationCalendarController {
         }
     }
 
-    // 특정 사용자의 모든 약물 복용 일정 조회 (GET /api/medication-schedules/user/{userId})
-    // 이 API는 기간별 조회가 있으므로 중복될 수 있으나, 모든 일정을 한 번에 가져오는 용도로 남겨둘 수 있습니다.
+    @Operation(summary = "특정 사용자 모든 복용 일정 조회", description = "ID에 해당하는 사용자의 모든 복용 일정을 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = MedicationCalendarDto.class)))),
+        @ApiResponse(responseCode = "404", description = "사용자 또는 일정 없음", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE)),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
+    })
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getMedicationSchedulesByUserId(@PathVariable String userId) {
+    public ResponseEntity<?> getMedicationSchedulesByUserId(
+            @Parameter(description = "사용자 ID", required = true, example = "user123") @PathVariable String userId) {
         try {
             List<MedicationCalendarDto> schedules = medicationCalendarService.getMedicationSchedulesByUserId(userId);
-            // schedules가 비어있어도 200 OK와 빈 리스트 반환
             return ResponseEntity.ok(schedules);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -95,24 +127,35 @@ public class MedicationCalendarController {
         }
     }
     
-    // (선택적) 모든 약물 복용 일정 조회 (GET /api/medication-schedules)
+    @Operation(summary = "모든 복용 일정 조회 (관리자용)", description = "시스템의 모든 복용 일정을 조회합니다. 관리자 권한이 필요할 수 있습니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = MedicationCalendarDto.class)))),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류") // 반환 타입이 ResponseEntity<List<MedicationCalendarDto>> 이므로, 여기서는 간단히.
+    })
     @GetMapping
     public ResponseEntity<List<MedicationCalendarDto>> getAllMedicationSchedules() {
-        // 이 API는 인증/인가를 통해 관리자만 접근 가능하도록 하는 것이 일반적입니다.
         try {
             List<MedicationCalendarDto> schedules = medicationCalendarService.getAllMedicationSchedules();
             return ResponseEntity.ok(schedules);
         } catch (Exception e) {
             System.err.println("Error fetching all medication schedules: " + e.getMessage());
             e.printStackTrace();
-            // 반환 타입을 ResponseEntity<?> 로 변경하고 에러 메시지 body에 포함 가능
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // build() 사용 시 content 없음
         }
     }
 
-    // 특정 ID의 약물 복용 일정 수정 (PUT /api/medication-schedules/{id})
+    @Operation(summary = "특정 ID 복용 일정 수정", description = "ID에 해당하는 복용 일정을 수정합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "수정 성공", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = MedicationCalendarDto.class))),
+        @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE)),
+        @ApiResponse(responseCode = "404", description = "일정 없음", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE)),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateMedicationSchedule(@PathVariable Long id, @RequestBody MedicationCalendarDto scheduleDto) {
+    public ResponseEntity<?> updateMedicationSchedule(
+            @Parameter(description = "수정할 복용 일정 ID", required = true, example = "1") @PathVariable Long id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "수정할 복용 일정 정보", required = true, content = @Content(schema = @Schema(implementation = MedicationCalendarDto.class)))
+            @RequestBody MedicationCalendarDto scheduleDto) {
         try {
             MedicationCalendarDto updatedSchedule = medicationCalendarService.updateMedicationSchedule(id, scheduleDto);
             return ResponseEntity.ok(updatedSchedule);
@@ -125,9 +168,15 @@ public class MedicationCalendarController {
         }
     }
 
-    // 특정 ID의 약물 복용 일정 삭제 (DELETE /api/medication-schedules/{id})
+    @Operation(summary = "특정 ID 복용 일정 삭제", description = "ID에 해당하는 복용 일정을 삭제합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "삭제 성공 (No Content)"),
+        @ApiResponse(responseCode = "404", description = "일정 없음"),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMedicationSchedule(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteMedicationSchedule(
+            @Parameter(description = "삭제할 복용 일정 ID", required = true, example = "1") @PathVariable Long id) {
         try {
             medicationCalendarService.deleteMedicationSchedule(id);
             return ResponseEntity.noContent().build();
@@ -141,11 +190,16 @@ public class MedicationCalendarController {
         }
     }
 
-    // 특정 사용자의 약물 이름으로 검색 (GET /api/medication-schedules/user/{userId}/search)
+    @Operation(summary = "사용자 약물 이름으로 복용 일정 검색", description = "특정 사용자의 복용 일정 중 약물 이름으로 검색합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "검색 성공", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = MedicationCalendarDto.class)))),
+        @ApiResponse(responseCode = "404", description = "사용자 또는 검색 결과 없음", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE)),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
+    })
     @GetMapping("/user/{userId}/search")
     public ResponseEntity<?> searchMedicationForUser(
-            @PathVariable String userId,
-            @RequestParam String medicationName) {
+            @Parameter(description = "사용자 ID", required = true, example = "user123") @PathVariable String userId,
+            @Parameter(description = "검색할 약물 이름", required = true, example = "아스피린") @RequestParam String medicationName) {
         try {
             List<MedicationCalendarDto> schedules = medicationCalendarService.findByMedicationNameForUser(userId, medicationName);
             return ResponseEntity.ok(schedules);
@@ -158,3 +212,4 @@ public class MedicationCalendarController {
         }
     }
 }
+// ... existing code ...
