@@ -50,7 +50,7 @@ UserInfoService UserInfoService;
         response.put("id", "을 반환 " );
         response.put("passwd", "이렇게 json");
         response.put("email", "합니다 ");
-
+        System.out.println("Test 용도");
         return ResponseEntity.ok(response); 
     }
 
