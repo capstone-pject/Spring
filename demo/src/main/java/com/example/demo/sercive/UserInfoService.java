@@ -1,14 +1,14 @@
-package com.example.demo.Sercive;
+package com.example.demo.sercive;
 
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.Dto.UserInfoDto;
-import com.example.demo.Entity.UserInfo;
-import com.example.demo.Repo.UserInfoRepo;
-import com.example.demo.Sercive.Utile.ConversionService;
+import com.example.demo.dto.UserInfoDto;
+import com.example.demo.entity.UserInfo;
+import com.example.demo.repo.UserInfoRepo;
+import com.example.demo.sercive.utile.ConversionService;
 @Service
 public class UserInfoService {
     

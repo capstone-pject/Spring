@@ -3,7 +3,7 @@ package com.example.demo.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.Dto.UserInfoDto;
+import com.example.demo.dto.UserInfoDto;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.example.demo.Sercive.UserInfoService;
+import com.example.demo.sercive.UserInfoService;
 
 import io.swagger.v3.oas.annotations.Operation; // 추가
 import io.swagger.v3.oas.annotations.media.Content; // 추가

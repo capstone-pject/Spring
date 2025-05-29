@@ -1,12 +1,12 @@
 // demo/src/main/java/com/example/demo/Sercive/MedicationCalendarService.java
-package com.example.demo.Sercive;
+package com.example.demo.sercive;
 
-import com.example.demo.Dto.MedicationCalendarDto;
-import com.example.demo.Entity.MedicationCalendar;
-import com.example.demo.Entity.UserInfo;
-import com.example.demo.Repo.MedicationCalendarRepository;
-import com.example.demo.Repo.UserInfoRepo;
-import com.example.demo.Sercive.Utile.ConversionService;
+import com.example.demo.dto.MedicationCalendarDto;
+import com.example.demo.entity.MedicationCalendar;
+import com.example.demo.entity.UserInfo;
+import com.example.demo.repo.MedicationCalendarRepository;
+import com.example.demo.repo.UserInfoRepo;
+import com.example.demo.sercive.utile.ConversionService;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;

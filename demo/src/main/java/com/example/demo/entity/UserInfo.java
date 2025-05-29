@@ -1,5 +1,5 @@
 // demo/src/main/java/com/example/demo/Entity/UserInfo.java
-package com.example.demo.Entity;
+package com.example.demo.entity;
 
 import java.util.ArrayList; // 추가
 import java.util.Date;

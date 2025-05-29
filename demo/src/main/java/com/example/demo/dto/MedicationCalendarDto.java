@@ -1,5 +1,5 @@
 // demo/src/main/java/com/example/demo/Dto/MedicationCalendarDto.java
-package com.example.demo.Dto;
+package com.example.demo.dto;
 
 import lombok.Getter;
 import lombok.Setter;
