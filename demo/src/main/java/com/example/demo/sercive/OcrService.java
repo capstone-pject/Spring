@@ -1,4 +1,4 @@
-package com.example.demo.Sercive;
+package com.example.demo.sercive;
 
 import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -10,7 +10,6 @@ import com.google.cloud.vision.v1.Feature;
 import com.google.cloud.vision.v1.Image;
 import com.google.cloud.vision.v1.ImageAnnotatorClient;
 import com.google.cloud.vision.v1.ImageAnnotatorSettings;
-import com.google.cloud.vision.v1.TextAnnotation; // TextAnnotation 사용
 import com.google.cloud.vision.v1.BoundingPoly; // BoundingPoly 사용
 import com.google.cloud.vision.v1.Vertex; // Vertex 사용
 import com.google.protobuf.ByteString;

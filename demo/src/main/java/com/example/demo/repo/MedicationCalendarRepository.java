@@ -1,8 +1,8 @@
 // demo/src/main/java/com/example/demo/Repository/MedicationCalendarRepository.java
-package com.example.demo.Repo;
+package com.example.demo.repo;
 
-import com.example.demo.Entity.MedicationCalendar;
-import com.example.demo.Entity.UserInfo;
+import com.example.demo.entity.MedicationCalendar;
+import com.example.demo.entity.UserInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

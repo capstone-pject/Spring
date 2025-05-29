@@ -2,8 +2,8 @@
 // demo/src/main/java/com/example/demo/controller/MedicationCalendarController.java
 package com.example.demo.controller;
 
-import com.example.demo.Dto.MedicationCalendarDto;
-import com.example.demo.Sercive.MedicationCalendarService;
+import com.example.demo.dto.MedicationCalendarDto;
+import com.example.demo.sercive.MedicationCalendarService;
 import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation; // 추가
 import io.swagger.v3.oas.annotations.Parameter; // 추가
-import io.swagger.v3.oas.annotations.enums.ParameterIn; // 추가
 import io.swagger.v3.oas.annotations.media.ArraySchema; // 추가
 import io.swagger.v3.oas.annotations.media.Content; // 추가
 import io.swagger.v3.oas.annotations.media.Schema; // 추가

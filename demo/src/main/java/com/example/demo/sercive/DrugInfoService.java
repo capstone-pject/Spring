@@ -1,9 +1,10 @@
-package com.example.demo.Sercive;
+package com.example.demo.sercive;
 
-import com.example.demo.Dto.DrugInfoDto;
+import com.example.demo.dto.DrugInfoDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -18,9 +19,10 @@ import java.util.List;
 
 @Service
 public class DrugInfoService {
-
-    private final String serviceKey = "7KAPRzfHxTBxel3urs%2BaQcFjVhSaJ%2FN6tXSNlU1ZrJgBEY1XS3lL0fm7sEKuC%2Bb6IchKVajWK0InBgxzVlgnVQ%3D%3D";
-    private final String BASE_URL = "https://apis.data.go.kr/1471000/DrbEasyDrugInfoService/getDrbEasyDrugList";
+    @Value("${drug-api.service-key}")
+    private String serviceKey;
+    @Value("${drug-api.base-url}")
+    private String BASE_URL;
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;

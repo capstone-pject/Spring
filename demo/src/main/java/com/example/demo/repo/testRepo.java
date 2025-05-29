@@ -1,8 +1,8 @@
-package com.example.demo.Repo;
+package com.example.demo.repo;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.example.demo.Entity.testEntity;
+import com.example.demo.entity.testEntity;
 
 public interface testRepo extends JpaRepository <testEntity, Long> {
     

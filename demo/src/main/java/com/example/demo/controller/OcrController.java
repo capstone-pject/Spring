@@ -1,9 +1,9 @@
 // ... existing code ...
 package com.example.demo.controller;
 
-import com.example.demo.Dto.DrugInfoDto;
-import com.example.demo.Sercive.DrugInfoService;
-import com.example.demo.Sercive.OcrService;
+import com.example.demo.dto.DrugInfoDto;
+import com.example.demo.sercive.DrugInfoService;
+import com.example.demo.sercive.OcrService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType; // 추가

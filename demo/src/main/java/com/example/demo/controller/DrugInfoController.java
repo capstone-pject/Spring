@@ -7,10 +7,10 @@ import org.springframework.http.MediaType; // 추가
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.demo.Dto.DrugInfoDto;
-import com.example.demo.Sercive.DrugInfoService;
+import com.example.demo.dto.DrugInfoDto;
+import com.example.demo.sercive.DrugInfoService;
 // import com.example.demo.Sercive.OcrService;
-import com.example.demo.Sercive.OcrService;
+import com.example.demo.sercive.OcrService;
 
 import io.swagger.v3.oas.annotations.Operation; // 추가
 import io.swagger.v3.oas.annotations.Parameter; // 추가
