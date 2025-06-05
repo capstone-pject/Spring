@@ -14,6 +14,8 @@ public class UserInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int userInfoId; // 필드명은 Java Naming Convention (camelCase) 권장: userInfoId -> id
 
+    private String userName;
+    
     private String userId; // 이 필드가 실제 사용자의 고유 ID (로그인 ID)로 사용되는 것 같습니다.
 
     private String password;
@@ -31,12 +33,22 @@ public class UserInfo {
 
     // 생성자, getter, setter는 Lombok @Data, @Getter, @Setter, @NoArgsConstructor, @AllArgsConstructor 등으로 대체 가능
 
-    public UserInfo(int userInfoId, String userId, String password, Date birth) {
+    public UserInfo(int userInfoId, String userId, String password, Date birth, String userName) {
         this.userInfoId = userInfoId;
         this.userId = userId;
         this.password = password;
         this.birth = birth;
+        this.userName = userName;
     }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
 
     public int getUserInfoId() {
         return userInfoId;

@@ -11,6 +11,8 @@ public class UserInfoDto {
 
     private Date birth;
 
+    private String userName;
+
     public UserInfoDto() {
     }
 
@@ -19,6 +21,15 @@ public class UserInfoDto {
         this.userId = userId;
         this.password = password;
         this.birth = birth;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public int getUserInfoId() {
@@ -56,7 +67,7 @@ public class UserInfoDto {
     @Override
     public String toString() {
         return "UserInfoDto [userInfoId=" + userInfoId + ", userId=" + userId + ", password=" + password + ", birth="
-                + birth + "]";
+                + birth + ", userName=" + userName + "]";
     }
 
 }
